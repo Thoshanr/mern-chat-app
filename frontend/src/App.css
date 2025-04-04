@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+body {
+    background-image: url('./bg.jpg');
+    background-size: cover; /* This will make the image cover the entire body */
+    background-position: center; /* This will center the image */
+    background-repeat: no-repeat;
+    height: 100vh;   /* Ensures the body takes the full viewport height */
+    margin: 0;
+ /* Removes default margin */
+}
+
+::-webkit-scrollbar{
+    width: 8px;
+}
+
+::-webkit-scrollbar-track{
+    background: #555;
+}
+
+::-webkit-scrollbar-thumb{
+    background: #121212;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background: #242424
+}
+

@@ -21,17 +21,14 @@ import generateTokenAndSetCookie from '../utils/generateToken.js';
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         
-        //  https://avatar-placeholder.iran.liara.run/
-        
-        const boyProfilePic = 'https://avatar.iran.liara.run/public/boy?username=${username}'
-        const girlProfilePic = 'https://avatar.iran.liara.run/public/girl?username=${username}'
+        const avatarVariant = [...username].reduce((sum, character) => sum + character.charCodeAt(0), 0) % 2 + 1;
 
         const newUser = new User({
           fullName,
           username,
           password:hashedPassword,
           gender,
-          profilePic: gender === "male" ? boyProfilePic : girlProfilePic
+          profilePic: `/avatars/anime-${gender}-${avatarVariant}.svg`
         });
 
         if(newUser) {
@@ -44,7 +41,8 @@ import generateTokenAndSetCookie from '../utils/generateToken.js';
           _id: newUser._id,
           fullName: newUser.fullName,
           username: newUser.username,
-          profilePic: newUser.profilePic
+          profilePic: newUser.profilePic,
+          gender: newUser.gender
         });
       }
       else {
@@ -76,7 +74,8 @@ import generateTokenAndSetCookie from '../utils/generateToken.js';
       _id: user._id,
       fullName: user.fullName,
       username: user.username,
-      profilePic: user.profilePic
+      profilePic: user.profilePic,
+      gender: user.gender
     });
 
   } catch (error) {

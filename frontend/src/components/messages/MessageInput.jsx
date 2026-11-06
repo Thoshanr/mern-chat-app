@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { BsSend } from 'react-icons/bs';
 import useSendMessage from '../../hooks/useSendMessage.js';
+import { primeChatAudio } from '../../utils/chatSounds.js';
 
 const MessageInput = () => {
   const [message, setMessage] = useState('');
   const { loading, sendMessage } = useSendMessage();
   const handleSubmit = async (event) => {
     event.preventDefault();
+    primeChatAudio();
     const text = message.trim();
     if (!text || loading) return;
-    await sendMessage(text);
-    setMessage('');
+    if (await sendMessage(text)) setMessage('');
   };
   return (
     <form className="message-form" onSubmit={handleSubmit}>

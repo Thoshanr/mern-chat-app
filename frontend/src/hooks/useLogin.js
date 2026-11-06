@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import toast from'react-hot-toast'
 import {useAuthContext} from '../context/AuthContext.jsx';
+import { playChatSound } from '../utils/chatSounds.js';
 
 const useLogin = () => {
     const [loading, setLoading] = useState(false);
@@ -26,6 +27,7 @@ const useLogin = () => {
 
             localStorage.setItem("chat-user", JSON.stringify(data));
             setAuthUser(data);
+            playChatSound('login');
 
         } catch (error) {
             toast.error(error.message);

@@ -4,26 +4,30 @@ import toast from 'react-hot-toast';
 
 const useGetMessages = () => {
     const [loading, setLoading] = useState(false); 
-    const {messages, setMessages, selectedConversation} = useConversation();
+    const messages = useConversation((state) => state.messages);
+    const setMessages = useConversation((state) => state.setMessages);
+    const selectedConversation = useConversation((state) => state.selectedConversation);
 
     useEffect(() => {
+        const controller = new AbortController();
         const getMessages = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`/api/messages/${selectedConversation._id}`);
+                const res = await fetch(`/api/messages/${selectedConversation._id}`, { signal: controller.signal });
                 const data = await res.json();
                 if (data.error) {
                     throw new Error(data.error);
                 }
                 setMessages(data);
             } catch (error) {
-                toast.error(error.message);
+                if (error.name !== 'AbortError') toast.error(error.message);
             } finally {
-                setLoading(false);;
+                if (!controller.signal.aborted) setLoading(false);
             }
         }
         if(selectedConversation?._id) getMessages();
-    }, [selectedConversation._id, setMessages]);
+        return () => controller.abort();
+    }, [selectedConversation?._id, setMessages]);
 
     return {messages, loading}
 }

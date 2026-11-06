@@ -5,11 +5,13 @@ import { TiMessages } from 'react-icons/ti';
 import useConversation from '../../zustand/useConversation.js';
 import { useAuthContext } from '../../context/AuthContext.jsx';
 import { useSocketContext } from '../../context/useSocketContext.js';
+import { getAnimeAvatar } from '../../utils/getAnimeAvatar.js';
 
 const MessageContainer = () => {
-  const { selectedConversation, setSelectedConversation } = useConversation();
+  const { selectedConversation, setSelectedConversation, markConversationRead } = useConversation();
   const { onlineUsers } = useSocketContext();
   useEffect(() => () => setSelectedConversation(null), [setSelectedConversation]);
+  useEffect(() => { if (selectedConversation?._id) markConversationRead(selectedConversation._id); }, [selectedConversation?._id, markConversationRead]);
 
   if (!selectedConversation) return <NoChatSelected />;
   const isOnline = onlineUsers.includes(selectedConversation._id);
@@ -17,7 +19,7 @@ const MessageContainer = () => {
   return (
     <section className="message-panel" aria-label={`Chat with ${selectedConversation.fullName}`}>
       <header className="chat-header">
-        <img src={selectedConversation.profilePic} alt="" />
+        <img src={getAnimeAvatar(selectedConversation)} alt={`${selectedConversation.fullName}'s anime avatar`} />
         <div>
           <div className="chat-peer-name">{selectedConversation.fullName}</div>
           <div className={`chat-peer-status ${isOnline ? 'online' : ''}`}>{isOnline ? '● Online now' : '○ Away'}</div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BiLogOut } from 'react-icons/bi';
 import useLogout from '../../hooks/useLogout.js';
+import { primeChatAudio } from '../../utils/chatSounds.js';
 
 const LogoutButton = () => {
   const { loading, logout } = useLogout();
@@ -18,7 +19,7 @@ const LogoutButton = () => {
             <p>You can sign back in whenever you’re ready.</p>
             <div className="logout-actions">
               <button type="button" className="theme-choice" onClick={() => setConfirming(false)}>Stay here</button>
-              <button type="button" className="confirm-logout" onClick={logout} disabled={loading}>{loading ? 'Signing out…' : 'Log out'}</button>
+              <button type="button" className="confirm-logout" onClick={() => { primeChatAudio(); void logout(); }} disabled={loading}>{loading ? 'Signing out…' : 'Log out'}</button>
             </div>
           </section>
         </div>

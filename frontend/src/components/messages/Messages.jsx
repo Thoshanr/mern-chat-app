@@ -2,11 +2,9 @@ import React, { useEffect } from 'react';
 import Message from './Message.jsx';
 import useGetMessages from '../../hooks/useGetMessages.js';
 import MessageSkeleton from '../skeletons/MessageSkeleton.jsx';
-import useListenMessages from '../../hooks/useListenMessages.js';
 
 const Messages = () => {
   const { messages, loading } = useGetMessages();
-  useListenMessages();
   useEffect(() => {
     const timer = window.setTimeout(() => document.getElementById('latest-message')?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 30);
     return () => window.clearTimeout(timer);

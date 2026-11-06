@@ -11,8 +11,15 @@ export const SocketContextProvider = ({ children }) => {
   useEffect(() => {
     if (!authUser) return undefined;
 
-    const socketUrl = import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin;
-    const activeSocket = io(socketUrl, { query: { userId: authUser._id } });
+    // Use the page's origin so phones on the same Wi-Fi connect through Vite's
+    // /socket.io proxy instead of trying to reach their own localhost.
+    const activeSocket = io(window.location.origin, {
+      path: '/socket.io',
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 5000,
+    });
     activeSocket.on('connect', () => setSocket(activeSocket));
     activeSocket.on('getOnlineUsers', setOnlineUsers);
     activeSocket.on('disconnect', () => {

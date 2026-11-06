@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useLogin from '../../useLogin.js';
+import { primeChatAudio } from '../../../utils/chatSounds.js';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { loading, login } = useLogin();
   useEffect(() => { document.body.dataset.theme = localStorage.getItem('chat-theme') || 'dark'; }, []);
-  const handleSubmit = async (event) => { event.preventDefault(); await login(username, password); };
+  const handleSubmit = async (event) => { event.preventDefault(); primeChatAudio(); await login(username, password); };
 
   return (
     <section className="auth-screen">

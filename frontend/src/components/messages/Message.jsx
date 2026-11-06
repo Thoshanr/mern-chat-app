@@ -2,13 +2,14 @@ import React from 'react';
 import { useAuthContext } from '../../context/AuthContext.jsx';
 import useConversation from '../../zustand/useConversation.js';
 import { extractTime } from '../../utils/extractTime.js';
+import { getAnimeAvatar } from '../../utils/getAnimeAvatar.js';
 
 const Message = ({ message }) => {
   const { authUser } = useAuthContext();
   const { selectedConversation } = useConversation();
   const fromMe = message.senderId === authUser._id;
   const formattedTime = extractTime(message.createdAt);
-  const profilePic = fromMe ? authUser.profilePic : selectedConversation?.profilePic;
+  const profilePic = getAnimeAvatar(fromMe ? authUser : selectedConversation);
 
   return (
     <div className={`chat ${fromMe ? 'chat-end' : 'chat-start'}`}>

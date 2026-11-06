@@ -9,10 +9,11 @@ const startServer = async () => {
   const { default: authRoutes } = await import("./routes/auth.routes.js");
   const { default: messageRoutes } = await import("./routes/message.routes.js");
   const { default: userRoutes } = await import("./routes/user.routes.js");
+  const { default: adminRoutes } = await import("./routes/admin.routes.js");
   const { app, server } = await import("./socket/socket.js");
 
   // Middleware
-  app.use(express.json());
+  app.use(express.json({ limit: "2mb" }));
   app.use(cookieParser());
   app.use(
     cors({
@@ -25,6 +26,7 @@ const startServer = async () => {
   app.use("/api/auth", authRoutes);
   app.use("/api/messages", messageRoutes);
   app.use("/api/users", userRoutes);
+  app.use("/api/admin", adminRoutes);
 
   // Serve the built frontend from frontend/dist
   const distPath = path.join(__dirname, "..", "frontend", "dist");

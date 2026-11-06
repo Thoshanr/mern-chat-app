@@ -1,6 +1,5 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js"
-import {getReceiverSocketId } from "../socket/socket.js";
 import { io } from '../socket/socket.js'
 export const sendMessage = async (req, res) => {
     try {
@@ -38,11 +37,9 @@ export const sendMessage = async (req, res) => {
 
         //  SOCKET.IO FUNCTIONALITY WILL GO HERE
 
-        const receiverSocketId = getReceiverSocketId(receiverId);
-        if(receiverSocketId) {
-            // io.to(<socket_id>).emit() used to send events to specific clients 
-            io.to(receiverSocketId).emit('newMessage', newMessage);
-        }
+        // Each user has a Socket.IO room, so every signed-in device receives
+        // the same message (not only the most recently connected device).
+        io.to(String(receiverId)).emit('newMessage', newMessage);
 
 
         res.status(201).json(newMessage);

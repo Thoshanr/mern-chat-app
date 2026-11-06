@@ -13,7 +13,8 @@ const SignUp = () => {
   return (
     <section className="auth-screen">
       <div className="auth-card">
-        <div className="brand-mark" style={{ margin: '0 auto 17px' }}>✦</div>
+        <div className="brand-mark shrine-mark" style={{ margin: '0 auto 17px' }}>⛩</div>
+        <p className="auth-app-name">SHRINE <span>TECH</span></p>
         <h1 className="auth-brand">Join the conversation</h1>
         <p className="auth-subtitle">A little closer, wherever you are.</p>
         <form onSubmit={handleSubmit}>

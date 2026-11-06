@@ -73,6 +73,10 @@
   box-shadow: 0 0 28px rgba(192, 132, 252, .48);
 }
 .brand-title { margin: 0; color: #fff; font-size: 17px; font-weight: 800; letter-spacing: .04em; }
+.brand-title, .auth-app-name { letter-spacing: .13em; font-weight: 900; }
+.brand-title span, .auth-app-name span { color: #67e8f9; text-shadow: 0 0 14px rgba(103,232,249,.6); }
+.shrine-mark { font-family: "Segoe UI Symbol", sans-serif; font-size: 22px; }
+.auth-app-name { margin: -8px 0 8px; color: #e9d5ff; font-size: 11px; text-align: center; }
 .brand-caption { margin: 3px 0 0; color: #9ba5c7; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; }
 
 .search-form { display: flex; align-items: center; gap: 8px; padding: 0 4px; }
@@ -221,18 +225,26 @@ body[data-theme="light"] .settings-panel { color: #241a3b; background: rgba(250,
 .confirm-logout { min-height: 36px; padding: 0 14px; border: 1px solid rgba(251,113,133,.5); border-radius: 12px; color: #fff; background: linear-gradient(120deg, #e11d48, #be123c); cursor: pointer; transition: transform .2s, box-shadow .2s; }
 .confirm-logout:hover { transform: translateY(-2px); box-shadow: 0 0 18px rgba(251,113,133,.3); }
 .settings-panel { max-height: min(78vh, 680px); overflow-y: auto; }
-.admin-image-form { display: grid; gap: 8px; margin-top: 9px; padding-top: 10px; border-top: 1px solid rgba(148,163,184,.16); }
-.admin-image-label { color: #e2e8f0; font-size: 11px; font-weight: 650; }
-.admin-image-file { width: 100%; color: #aeb8d1; font-size: 10px; }
+.admin-trigger { width: 100%; min-height: 38px; margin-top: 18px; border-radius: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.admin-access-dialog { position: relative; width: min(420px, 100%); padding: 33px 26px 26px; border: 1px solid rgba(103,232,249,.5); border-radius: 27px; color: #f8f4ff; background: linear-gradient(145deg, rgba(25,23,54,.98), rgba(7,20,38,.98)); box-shadow: 0 25px 90px rgba(0,0,0,.58), 0 0 45px rgba(139,92,246,.28); text-align: center; animation: shell-in .25s ease both; }
+.admin-access-dialog h2, .admin-qr-dialog h2 { margin: 0 0 8px; color: white; font-size: 21px; font-weight: 850; letter-spacing: -.02em; }
+.admin-access-dialog p, .admin-qr-message { margin: 0; color: #aeb8d1; font-size: 13px; line-height: 1.65; }
+.admin-access-symbol { display: grid; width: 58px; height: 58px; place-items: center; margin: 0 auto 14px; border: 1px solid rgba(103,232,249,.48); border-radius: 20px; color: #b9fbff; background: linear-gradient(140deg, rgba(139,92,246,.32), rgba(34,211,238,.14)); box-shadow: 0 0 25px rgba(103,232,249,.22); font-size: 27px; }
+.admin-access-form { display: grid; gap: 4px; margin-top: 20px; }
+.admin-access-form .admin-password-field { height: 46px; text-align: center; font-size: 13px; }
+.admin-access-form .auth-submit { margin-top: 11px; }
 .admin-password-field { width: 100%; min-width: 0; height: 36px; padding: 0 10px; border: 1px solid rgba(148,163,184,.24); border-radius: 11px; outline: 0; color: #fff; background: rgba(7,12,27,.66); font-size: 10px; }
 .admin-password-field:focus { border-color: #67e8f9; box-shadow: 0 0 0 3px rgba(103,232,249,.12); }
-.admin-image-hint { margin: 0; color: #8792ae; font-size: 9px; line-height: 1.45; }
-.admin-save-button, .admin-view-button { width: 100%; min-height: 34px; }
-.admin-save-button:disabled { cursor: not-allowed; opacity: .45; }
 .admin-image-overlay { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(4,5,16,.82); backdrop-filter: blur(12px); animation: panel-in .2s ease both; }
-.admin-image-dialog { position: relative; display: grid; max-width: min(900px, 94vw); max-height: 88vh; place-items: center; padding: 12px; border: 1px solid rgba(103,232,249,.55); border-radius: 24px; background: rgba(14,17,38,.88); box-shadow: 0 0 55px rgba(192,132,252,.35); }
+.admin-image-dialog { position: relative; display: grid; width: min(780px, 94vw); min-height: 270px; max-height: 88vh; place-items: center; padding: 52px 26px 26px; border: 1px solid rgba(103,232,249,.55); border-radius: 27px; background: linear-gradient(145deg, rgba(20,19,46,.98), rgba(7,18,34,.98)); box-shadow: 0 0 55px rgba(192,132,252,.35); animation: shell-in .25s ease both; }
+.admin-qr-dialog h2 { align-self: start; text-align: center; }
 .admin-image-dialog img { display: block; max-width: 100%; max-height: calc(88vh - 24px); border-radius: 15px; object-fit: contain; }
+.admin-qr-dialog img { width: min(570px, 78vw); max-height: calc(82vh - 125px); border: 1px solid rgba(255,255,255,.24); border-radius: 18px; background: white; object-fit: contain; box-shadow: 0 0 35px rgba(103,232,249,.25); }
+.admin-qr-message { max-width: 480px; margin: 18px auto 0; text-align: center; }
 .admin-image-close { position: absolute; z-index: 1; top: 18px; right: 18px; display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid rgba(255,255,255,.44); border-radius: 50%; color: white; background: rgba(7,12,27,.78); font-size: 24px; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+@media (max-width: 430px) {
+  .admin-image-dialog { min-height: 240px; padding: 50px 16px 18px; }
 }

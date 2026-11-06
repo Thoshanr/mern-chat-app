@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { IoSettingsOutline } from 'react-icons/io5';
 import SearchInput from './SearchInput.jsx';
 import Conversations from './Conversations.jsx';
@@ -24,23 +24,15 @@ const Sidebar = () => {
   const [sentColor, setSentColor] = useState(() => localStorage.getItem('chat-sent-color') || sentColors[0].value);
   const [receivedColor, setReceivedColor] = useState(() => localStorage.getItem('chat-received-color') || receivedColors[0].value);
   const [adminPassword, setAdminPassword] = useState('');
-  const [imageData, setImageData] = useState('');
-  const [adminImage, setAdminImage] = useState(null);
-  const [adminImageOpen, setAdminImageOpen] = useState(false);
+  const [adminPasswordOpen, setAdminPasswordOpen] = useState(false);
+  const [adminQrOpen, setAdminQrOpen] = useState(false);
+  const [adminQrState, setAdminQrState] = useState('idle');
+  const [adminQrUrl, setAdminQrUrl] = useState('');
   const [adminBusy, setAdminBusy] = useState(false);
+  const adminTapCount = useRef(0);
+  const adminTapTimer = useRef(null);
 
-  useEffect(() => {
-    if (!settingsOpen) return undefined;
-    const controller = new AbortController();
-    fetch('/api/admin/showcase-image', { signal: controller.signal })
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Could not check the admin image.');
-        setAdminImage(data.imageData ? data : null);
-      })
-      .catch((error) => { if (error.name !== 'AbortError') toast.error(error.message); });
-    return () => controller.abort();
-  }, [settingsOpen]);
+  useEffect(() => () => window.clearTimeout(adminTapTimer.current), []);
 
   useEffect(() => {
     document.body.dataset.theme = theme;
@@ -51,41 +43,42 @@ const Sidebar = () => {
     localStorage.setItem('chat-received-color', receivedColor);
   }, [theme, sentColor, receivedColor]);
 
-  const selectAdminImage = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) || file.size > 1_200_000) {
-      toast.error('Choose a PNG, JPG, WEBP, or GIF smaller than 1.2 MB.');
-      event.target.value = '';
-      return;
+  const handleAdminTap = () => {
+    adminTapCount.current += 1;
+    window.clearTimeout(adminTapTimer.current);
+    adminTapTimer.current = window.setTimeout(() => { adminTapCount.current = 0; }, 5000);
+    if (adminTapCount.current >= 10) {
+      adminTapCount.current = 0;
+      window.clearTimeout(adminTapTimer.current);
+      setAdminPassword('');
+      setAdminPasswordOpen(true);
     }
-    const reader = new FileReader();
-    reader.onload = () => setImageData(String(reader.result));
-    reader.onerror = () => toast.error('This image could not be read.');
-    reader.readAsDataURL(file);
   };
 
-  const saveAdminImage = async (event) => {
+  const unlockAdmin = async (event) => {
     event.preventDefault();
-    if (!imageData || !adminPassword) {
-      toast.error('Choose an image and enter the administrator password.');
-      return;
-    }
-    const form = event.currentTarget;
     setAdminBusy(true);
     try {
-      const response = await fetch('/api/admin/showcase-image', {
-        method: 'PUT',
+      const response = await fetch('/api/admin/unlock', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminPassword, imageData }),
+        body: JSON.stringify({ password: adminPassword }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Could not save the image.');
-      setAdminImage(data);
+      if (!response.ok) throw new Error(data.error || 'Could not verify the admin password.');
       setAdminPassword('');
-      setImageData('');
-      form.reset();
-      toast.success('Admin image updated for everyone.');
+      setAdminPasswordOpen(false);
+      setAdminQrOpen(true);
+      setAdminQrState('loading');
+      const qrResponse = await fetch('/api/admin/qr');
+      if (qrResponse.ok) {
+        setAdminQrUrl(URL.createObjectURL(await qrResponse.blob()));
+        setAdminQrState('available');
+      } else {
+        const qrError = await qrResponse.json();
+        setAdminQrState(qrResponse.status === 404 ? 'missing' : 'error');
+        if (qrResponse.status !== 404) toast.error(qrError.error || 'Could not load the admin QR.');
+      }
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -93,11 +86,17 @@ const Sidebar = () => {
     }
   };
 
+  const closeAdminQr = () => {
+    if (adminQrUrl) URL.revokeObjectURL(adminQrUrl);
+    setAdminQrUrl('');
+    setAdminQrOpen(false);
+  };
+
   return (
     <aside className="app-sidebar">
       <div className="brand-row">
-        <div className="brand-mark" aria-hidden="true">✦</div>
-        <div><p className="brand-title">ChatApp</p><p className="brand-caption">Your people, in sync</p></div>
+        <div className="brand-mark shrine-mark" aria-hidden="true">⛩</div>
+        <div><p className="brand-title">SHRINE <span>TECH</span></p><p className="brand-caption">Your people, in sync</p></div>
       </div>
       <SearchInput />
       <p className="section-label">Contacts</p>
@@ -125,22 +124,32 @@ const Sidebar = () => {
           <div className="settings-options">
             {receivedColors.map((color) => <button key={color.name} type="button" className="swatch-button" title={color.name} aria-label={`Received message color: ${color.name}`} aria-pressed={receivedColor === color.value} style={{ background: color.value }} onClick={() => setReceivedColor(color.value)} />)}
           </div>
-          <p className="settings-caption">Admin showcase</p>
-          {adminImage?.imageData && <button type="button" className="theme-choice admin-view-button" onClick={() => setAdminImageOpen(true)}>✦ View the showcase image</button>}
-          <form className="admin-image-form" onSubmit={saveAdminImage}>
-            <label className="admin-image-label" htmlFor="admin-showcase-upload">Upload or replace image</label>
-            <input id="admin-showcase-upload" className="admin-image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={selectAdminImage} />
-            <input className="admin-password-field" type="password" autoComplete="new-password" minLength={20} placeholder="Admin password (20+ characters)" value={adminPassword} onChange={(event) => setAdminPassword(event.target.value)} />
-            <button className="theme-choice admin-save-button" type="submit" disabled={adminBusy || !imageData || adminPassword.length < 20}>{adminBusy ? 'Saving…' : 'Save for everyone'}</button>
-            <p className="admin-image-hint">The password stays on the server. Configure it as ADMIN_PASSWORD before using this feature.</p>
-          </form>
+          <button type="button" className="theme-choice admin-trigger" onClick={handleAdminTap}>Admin</button>
         </section>
       )}
-      {adminImageOpen && adminImage?.imageData && (
-        <div className="admin-image-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setAdminImageOpen(false); }}>
-          <section className="admin-image-dialog" role="dialog" aria-modal="true" aria-label="Admin showcase image">
-            <button type="button" className="admin-image-close" aria-label="Close image" onClick={() => setAdminImageOpen(false)}>×</button>
-            <img src={adminImage.imageData} alt="Administrator showcase" />
+      {adminPasswordOpen && (
+        <div className="admin-image-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setAdminPasswordOpen(false); }}>
+          <section className="admin-access-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-access-title">
+            <button type="button" className="admin-image-close" aria-label="Close admin prompt" onClick={() => setAdminPasswordOpen(false)}>×</button>
+            <div className="admin-access-symbol">⛩</div>
+            <h2 id="admin-access-title">Shrine Tech Admin</h2>
+            <p>Enter the private admin password to continue.</p>
+            <form className="admin-access-form" onSubmit={unlockAdmin}>
+              <input autoFocus className="admin-password-field" type="password" autoComplete="current-password" value={adminPassword} onChange={(event) => setAdminPassword(event.target.value)} placeholder="Admin password" aria-label="Admin password" />
+              <button className="auth-submit" type="submit" disabled={adminBusy || !adminPassword}>{adminBusy ? 'Checking…' : 'Unlock QR'}</button>
+            </form>
+          </section>
+        </div>
+      )}
+      {adminQrOpen && (
+        <div className="admin-image-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeAdminQr(); }}>
+          <section className="admin-image-dialog admin-qr-dialog" role="dialog" aria-modal="true" aria-labelledby="admin-qr-title">
+            <button type="button" className="admin-image-close" aria-label="Close QR popup" onClick={closeAdminQr}>×</button>
+            <h2 id="admin-qr-title">Shrine Tech • Admin QR</h2>
+            {adminQrState === 'loading' && <p className="admin-qr-message">Loading your private QR…</p>}
+            {adminQrState === 'available' && <img src={adminQrUrl} alt="Private Shrine Tech admin QR code" />}
+            {adminQrState === 'missing' && <p className="admin-qr-message">Admin access verified. The QR isn’t added yet. Send me the QR image when you’re ready, and I’ll add it privately to the app.</p>}
+            {adminQrState === 'error' && <p className="admin-qr-message">The QR couldn’t be loaded. Please unlock again in a moment.</p>}
           </section>
         </div>
       )}

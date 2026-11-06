@@ -1,8 +1,8 @@
 import express from 'express';
-import { getAdminImage, saveAdminImage } from '../controllers/admin.controller.js';
+import { getAdminQr, unlockAdminQr } from '../controllers/admin.controller.js';
 
 const router = express.Router();
-router.get('/showcase-image', getAdminImage);
-router.put('/showcase-image', saveAdminImage);
+router.post('/unlock', unlockAdminQr);
+router.get('/qr', getAdminQr);
 
 export default router;

@@ -1,32 +1,24 @@
-import React, {useState} from 'react'
-import {BsSend} from 'react-icons/bs'
+import React, { useState } from 'react';
+import { BsSend } from 'react-icons/bs';
 import useSendMessage from '../../hooks/useSendMessage.js';
 
-const MessageInput = () => {  
-const [message, setMessage] = useState('');
-const {loading, sendMessage} = useSendMessage(); 
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if(!message) return;
-    await sendMessage(message);
-    setMessage("");
-  }
+const MessageInput = () => {
+  const [message, setMessage] = useState('');
+  const { loading, sendMessage } = useSendMessage();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const text = message.trim();
+    if (!text || loading) return;
+    await sendMessage(text);
+    setMessage('');
+  };
   return (
-    <form className='px-4 my-3' onSubmit={handleSubmit}>
-        <div className='w-full relative'>
-            <input type="text"
-            className='border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 text-white' 
-            placeholder='Send a message'
-            value={message}
-            onChange={(e) => setMessage(e.target.value) }
-            /> 
-            <button type='submit' className='cursor-pointer absolute inset-y-0 end-0 flex items-center pe-3'>
-                {loading ? <div className='loading loading-spinner'></div> : <BsSend/>  }
-            </button>
-        </div>
+    <form className="message-form" onSubmit={handleSubmit}>
+      <input className="message-field" type="text" aria-label="Write a message" placeholder="Write something kind…" value={message} onChange={(event) => setMessage(event.target.value)} />
+      <button type="submit" className="send-button" aria-label="Send message" disabled={loading || !message.trim()}>
+        {loading ? <span className="loading loading-spinner" /> : <BsSend />}
+      </button>
     </form>
-  )
-}
-
-export default MessageInput
+  );
+};
+export default MessageInput;

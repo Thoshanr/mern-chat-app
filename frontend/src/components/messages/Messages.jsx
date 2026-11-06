@@ -1,40 +1,23 @@
-import React, { useRef } from 'react'
-import Message from './Message.jsx'
-import '../../../src/App.css'
-import useGetMessages from '../../hooks/useGetMessages.js'
-import MessageSkeleton from '../skeletons/MessageSkeleton.jsx'
-import { useEffect } from 'react'
-import useListenMessages from '../../hooks/useListenMessages.js'
+import React, { useEffect } from 'react';
+import Message from './Message.jsx';
+import useGetMessages from '../../hooks/useGetMessages.js';
+import MessageSkeleton from '../skeletons/MessageSkeleton.jsx';
+import useListenMessages from '../../hooks/useListenMessages.js';
+
 const Messages = () => {
-  const {messages, loading} = useGetMessages();
+  const { messages, loading } = useGetMessages();
   useListenMessages();
-  const lastMessageRef = useRef();
-  
   useEffect(() => {
-    setTimeout(() => {
-      lastMessageRef.current?.scrollIntoView({ behavior: "smooth"});
-    },20);
+    const timer = window.setTimeout(() => document.getElementById('latest-message')?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 30);
+    return () => window.clearTimeout(timer);
   }, [messages]);
 
   return (
-    <div className='px-4 flex-1 overflow-auto scrollbar-track-rounded'>
-       {!loading && 
-       messages.length > 0 && 
-       messages.map((message) => (
-        <div key={message._id}
-           ref = {lastMessageRef}
-        >
-          <Message  message={message} />
-        </div>
-       ))}
-       
-       {loading && [...Array(3)].map((_, idx) => <MessageSkeleton key={idx} />) }
-
-       {!loading && messages.length === 0 && (
-        <p className='text-center text-gray-400'>Send a message to start the conversation</p>
-       )}
+    <div className="message-list" aria-live="polite">
+      {!loading && messages.map((message, index) => <div id={index === messages.length - 1 ? 'latest-message' : undefined} key={message._id}><Message message={message} /></div>)}
+      {loading && [...Array(3)].map((_, index) => <MessageSkeleton key={index} />)}
+      {!loading && messages.length === 0 && <p className="chat-peer-status" style={{ textAlign: 'center', padding: '18px' }}>This is the start of something good. Say hello ✨</p>}
     </div>
-  )
-}
-
+  );
+};
 export default Messages;

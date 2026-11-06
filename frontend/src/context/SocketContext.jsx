@@ -1,41 +1,26 @@
-import React, {createContext, useState, useEffect, useContext} from 'react';
-import { useAuthContext} from './AuthContext.jsx'
+import React, { useState, useEffect } from 'react';
+import { useAuthContext } from './AuthContext.jsx';
+import { SocketContext } from './socketContext.js';
 import io from 'socket.io-client';
 
-const SocketContext = createContext();
+export const SocketContextProvider = ({ children }) => {
+  const [socket, setSocket] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const { authUser } = useAuthContext();
 
-export const useSocketContext = () => {
-    return useContext(SocketContext);
-}
+  useEffect(() => {
+    if (!authUser) return undefined;
 
-export const SocketContextProvider = ({children}) => {
-    const [socket, setSocket] = useState(null);
-    const [onlineUsers, setOnlineUsers] = useState([]);
-    const {authUser} = useAuthContext();
+    const socketUrl = import.meta.env.DEV ? 'http://localhost:5000' : window.location.origin;
+    const activeSocket = io(socketUrl, { query: { userId: authUser._id } });
+    activeSocket.on('connect', () => setSocket(activeSocket));
+    activeSocket.on('getOnlineUsers', setOnlineUsers);
+    activeSocket.on('disconnect', () => {
+      setSocket(null);
+      setOnlineUsers([]);
+    });
+    return () => activeSocket.close();
+  }, [authUser]);
 
-    useEffect(() => {
-        if(authUser) {
-            const socket = io('https://mern-chat-app-ab7b.onrender.com/', {
-                query:{
-                    userId: authUser._id,
-                },
-            });
-
-            setSocket(socket);
-
-            socket.on('getOnlineUsers', (users) =>{
-                setOnlineUsers(users);
-            });
-
-            return () => socket.close();
-        } else {
-            if(socket) {
-                socket.close();
-                setSocket(null);
-            }
-        }
-    }, [authUser]);
-
-
-    return <SocketContext.Provider value={{socket, onlineUsers}}>{children} </SocketContext.Provider>
-}
+  return <SocketContext.Provider value={{ socket, onlineUsers }}>{children}</SocketContext.Provider>;
+};
